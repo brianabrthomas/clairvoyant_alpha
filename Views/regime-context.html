@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regime &amp; Context &mdash; ClairvoyantAlpha</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f1419; color: #e6edf3; min-height: 100vh; }
+
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 2rem; background: #161b22; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #e6edf3; }
+        .navbar-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #58a6ff 0%, #a371f7 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; }
+        .navbar-title { font-size: 1.1rem; font-weight: 600; }
+        .navbar-nav { display: flex; gap: 0.4rem; align-items: center; }
+        .navbar-nav a { color: #8b949e; text-decoration: none; font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 6px; transition: all 0.15s; }
+        .navbar-nav a:hover { background: rgba(56, 139, 253, 0.08); color: #c9d1d9; }
+        .navbar-nav a.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; font-weight: 600; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #8b949e; text-decoration: none; font-size: 0.82rem; padding: 1.5rem 2rem 0; transition: color 0.15s; }
+        .back-link:hover { color: #58a6ff; }
+
+        .page-hero { padding: 1.5rem 2rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .page-hero-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .page-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(247, 120, 186, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .page-icon svg { width: 26px; height: 26px; color: #f778ba; }
+        .page-title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        .page-subtitle { color: #8b949e; font-size: 0.95rem; line-height: 1.6; max-width: 720px; }
+
+        .content { max-width: 1100px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.25rem; }
+        .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; color: #e6edf3; }
+        .card-text { font-size: 0.8rem; color: #8b949e; line-height: 1.55; }
+
+        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #c9d1d9; padding-bottom: 0.4rem; border-bottom: 1px solid #21262d; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 2rem; }
+        .data-table th, .data-table td { padding: 0.55rem 0.75rem; text-align: left; border: 1px solid #30363d; }
+        .data-table th { background: #21262d; color: #58a6ff; font-weight: 600; }
+        .data-table tr:nth-child(even) { background: rgba(33, 38, 45, 0.4); }
+        .data-table td { color: #c9d1d9; }
+
+        .formula-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; font-family: 'Cambria Math', Georgia, serif; font-size: 1rem; color: #79c0ff; margin-bottom: 2rem; text-align: center; letter-spacing: 0.02em; }
+        .formula-block .label { font-family: 'Segoe UI', sans-serif; font-size: 0.72rem; color: #6e7681; display: block; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; margin-right: 0.3rem; margin-bottom: 0.3rem; }
+        .tag-pink { background: rgba(247, 120, 186, 0.12); color: #f778ba; }
+        .tag-blue { background: rgba(88, 166, 255, 0.12); color: #58a6ff; }
+        .tag-green { background: rgba(63, 185, 80, 0.12); color: #3fb950; }
+
+        /* Transition Matrix Preview */
+        .matrix-preview { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
+        .matrix-label { font-size: 0.75rem; color: #6e7681; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; text-align: center; }
+        .matrix-table { width: 100%; max-width: 500px; margin: 0 auto; border-collapse: collapse; font-size: 0.78rem; }
+        .matrix-table th, .matrix-table td { padding: 0.5rem; text-align: center; border: 1px solid #30363d; }
+        .matrix-table th { background: #21262d; color: #8b949e; font-weight: 600; font-size: 0.7rem; }
+        .matrix-table td { font-family: 'Consolas', monospace; }
+        .matrix-table .high { color: #3fb950; }
+        .matrix-table .mid { color: #d29922; }
+        .matrix-table .low { color: #8b949e; }
+
+        @media (max-width: 640px) {
+            .card-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.4rem; }
+            .content, .page-hero { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-brand">
+            <div class="navbar-logo">CA</div>
+            <span class="navbar-title">ClairvoyantAlpha</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="../index.html" class="active">Platform</a>
+            <a href="../home.html">Query Generator</a>
+            <a href="../d.html">DuckDB Browser</a>
+        </div>
+    </nav>
+
+    <a href="../index.html" class="back-link">&larr; Back to Platform</a>
+
+    <section class="page-hero">
+        <div class="page-hero-top">
+            <div class="page-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+            </div>
+            <h1 class="page-title">Regime &amp; Context</h1>
+        </div>
+        <p class="page-subtitle">
+            Sector stability, macro sensitivity, and cross-sector dynamics provide the contextual fabric that
+            determines how strongly each information signal transmits into price. The regime response kernel
+            <em>E[R<sub>k,t</sub> | M<sub>t</sub>]</em> answers: "In THIS regime, does this type of information matter?"
+        </p>
+    </section>
+
+    <div class="content">
+        <div class="formula-block">
+            <span class="label">Regime Response Kernel</span>
+            E[R<sub>k,t</sub> | M<sub>t</sub>] = P(regime = k | indicators<sub>t</sub>) &middot; &mu;<sub>k</sub>
+        </div>
+
+        <!-- Transition Matrix -->
+        <div class="matrix-preview">
+            <div class="matrix-label">Sample Transition Matrix (6-Month Horizon)</div>
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>From \ To</th>
+                        <th>Growth</th>
+                        <th>Disinflation</th>
+                        <th>Tightening</th>
+                        <th>Crisis</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Growth</th>
+                        <td class="high">0.52</td>
+                        <td class="mid">0.28</td>
+                        <td class="low">0.15</td>
+                        <td class="low">0.05</td>
+                    </tr>
+                    <tr>
+                        <th>Disinflation</th>
+                        <td class="mid">0.35</td>
+                        <td class="high">0.40</td>
+                        <td class="low">0.18</td>
+                        <td class="low">0.07</td>
+                    </tr>
+                    <tr>
+                        <th>Tightening</th>
+                        <td class="low">0.12</td>
+                        <td class="mid">0.22</td>
+                        <td class="high">0.48</td>
+                        <td class="low">0.18</td>
+                    </tr>
+                    <tr>
+                        <th>Crisis</th>
+                        <td class="low">0.08</td>
+                        <td class="mid">0.30</td>
+                        <td class="low">0.15</td>
+                        <td class="high">0.47</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="section-title">Capabilities</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Sector Correlation Dynamics</div>
+                <div class="card-text">Rolling inter-sector and intra-sector correlation tracking. Correlation spikes detected as regime change signals. Cross-asset contagion pathways mapped in graph view.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Macro Sensitivity Scoring</div>
+                <div class="card-text">Per-asset beta to each macro state. Which stocks are most sensitive to rate changes, credit conditions, or growth slowdowns? Regime-conditional sensitivity maps.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Structural Break Detection</div>
+                <div class="card-text">CUSUM, Bai-Perron, and Bayesian change-point tests identify when relationships shift permanently vs. temporarily. Critical for distinguishing cyclical from secular changes.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Sector Rotation Models</div>
+                <div class="card-text">Which sectors lead and lag across regime transitions? Historical rotation patterns mapped to transition probabilities for anticipatory positioning.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Nested Regime Hierarchies</div>
+                <div class="card-text">Matrices inside matrices: macro regime → sector sub-regime → company micro-state. Hierarchical Markov models capture multi-scale dynamics.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Historical Analog Search</div>
+                <div class="card-text">Semantic similarity search across historical regime states. "When did the current environment last look like this?" with outcome distributions from matched periods.</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Context Data</h3>
+        <table class="data-table">
+            <thead>
+                <tr><th>Category</th><th>Coverage</th><th>Use Case</th><th>Tags</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GICS / NAICS</td>
+                    <td>Sector and industry classifications</td>
+                    <td>Peer grouping, sector rotation</td>
+                    <td><span class="tag tag-pink">context:sector</span></td>
+                </tr>
+                <tr>
+                    <td>ETF Holdings</td>
+                    <td>Sector ETF composition, weights, flows</td>
+                    <td>Flow-driven price impact</td>
+                    <td><span class="tag tag-blue">flow:etf</span></td>
+                </tr>
+                <tr>
+                    <td>Correlation Matrices</td>
+                    <td>Rolling cross-asset correlations</td>
+                    <td>Regime detection, diversification</td>
+                    <td><span class="tag tag-green">stat:correlation</span></td>
+                </tr>
+                <tr>
+                    <td>Regime Assignments</td>
+                    <td>Historical regime labels with confidence</td>
+                    <td>Conditional analysis baseline</td>
+                    <td><span class="tag tag-pink">regime:label</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="section-title">Statistical Artifacts (Precomputed)</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Transition Probability Models</div>
+                <div class="card-text">Bayesian HMM posteriors for regime transition probabilities. Fan charts projecting regime evolution at 1/3/6/12 month horizons with uncertainty bands.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Sector Sensitivity Matrices</div>
+                <div class="card-text">Per-sector response coefficients to each macro state. Stored as regime-conditional beta matrices with MCMC-derived confidence intervals.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Change-Point Archives</div>
+                <div class="card-text">Historical catalog of detected structural breaks with before/after parameter estimates. Enables pattern matching against current conditions.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding:2rem; border-top:1px solid #21262d; color:#6e7681; font-size:0.75rem;">
+        ClairvoyantAlpha &middot; Regime &amp; Context
+    </footer>
+</body>
+</html>

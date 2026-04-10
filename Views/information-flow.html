@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Flow &mdash; ClairvoyantAlpha</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f1419; color: #e6edf3; min-height: 100vh; }
+
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 2rem; background: #161b22; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #e6edf3; }
+        .navbar-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #58a6ff 0%, #a371f7 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; }
+        .navbar-title { font-size: 1.1rem; font-weight: 600; }
+        .navbar-nav { display: flex; gap: 0.4rem; align-items: center; }
+        .navbar-nav a { color: #8b949e; text-decoration: none; font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 6px; transition: all 0.15s; }
+        .navbar-nav a:hover { background: rgba(56, 139, 253, 0.08); color: #c9d1d9; }
+        .navbar-nav a.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; font-weight: 600; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #8b949e; text-decoration: none; font-size: 0.82rem; padding: 1.5rem 2rem 0; transition: color 0.15s; }
+        .back-link:hover { color: #58a6ff; }
+
+        .page-hero { padding: 1.5rem 2rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .page-hero-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .page-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(210, 153, 34, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .page-icon svg { width: 26px; height: 26px; color: #d29922; }
+        .page-title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        .page-subtitle { color: #8b949e; font-size: 0.95rem; line-height: 1.6; max-width: 720px; }
+
+        .content { max-width: 1100px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.25rem; }
+        .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; color: #e6edf3; }
+        .card-text { font-size: 0.8rem; color: #8b949e; line-height: 1.55; }
+
+        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #c9d1d9; padding-bottom: 0.4rem; border-bottom: 1px solid #21262d; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 2rem; }
+        .data-table th, .data-table td { padding: 0.55rem 0.75rem; text-align: left; border: 1px solid #30363d; }
+        .data-table th { background: #21262d; color: #58a6ff; font-weight: 600; }
+        .data-table tr:nth-child(even) { background: rgba(33, 38, 45, 0.4); }
+        .data-table td { color: #c9d1d9; }
+
+        .formula-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; font-family: 'Cambria Math', Georgia, serif; font-size: 1rem; color: #79c0ff; margin-bottom: 2rem; text-align: center; letter-spacing: 0.02em; }
+        .formula-block .label { font-family: 'Segoe UI', sans-serif; font-size: 0.72rem; color: #6e7681; display: block; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; margin-right: 0.3rem; margin-bottom: 0.3rem; }
+        .tag-orange { background: rgba(210, 153, 34, 0.12); color: #d29922; }
+        .tag-blue { background: rgba(88, 166, 255, 0.12); color: #58a6ff; }
+        .tag-green { background: rgba(63, 185, 80, 0.12); color: #3fb950; }
+
+        .evidence-tier { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+        .tier-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: #161b22; border: 1px solid #30363d; border-radius: 8px; }
+        .tier-badge { font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.05em; }
+        .tier-badge.t1 { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+        .tier-badge.t2 { background: rgba(88, 166, 255, 0.15); color: #58a6ff; }
+        .tier-badge.t3 { background: rgba(210, 153, 34, 0.15); color: #d29922; }
+        .tier-text { font-size: 0.82rem; color: #c9d1d9; }
+
+        @media (max-width: 640px) {
+            .card-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.4rem; }
+            .content, .page-hero { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-brand">
+            <div class="navbar-logo">CA</div>
+            <span class="navbar-title">ClairvoyantAlpha</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="../index.html" class="active">Platform</a>
+            <a href="../home.html">Query Generator</a>
+            <a href="../d.html">DuckDB Browser</a>
+        </div>
+    </nav>
+
+    <a href="../index.html" class="back-link">&larr; Back to Platform</a>
+
+    <section class="page-hero">
+        <div class="page-hero-top">
+            <div class="page-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+            </div>
+            <h1 class="page-title">Information Flow</h1>
+        </div>
+        <p class="page-subtitle">
+            Research reports, earnings surprises, and analyst revisions form the informational backbone of price discovery.
+            High &beta; to research signals institutional ownership and sell-side credibility.
+            Information is ranked by an evidence hierarchy &mdash; not by volume or recency.
+        </p>
+    </section>
+
+    <div class="content">
+        <div class="formula-block">
+            <span class="label">Revision Momentum Signal</span>
+            S<sub>revision,t</sub> = &Sigma;<sub>j</sub> w<sub>j</sub> &middot; &Delta;EPS<sub>j,t</sub> / &sigma;<sub>historical</sub>
+        </div>
+
+        <h3 class="section-title">Evidence Hierarchy (CFA-Grade)</h3>
+        <div class="evidence-tier">
+            <div class="tier-item">
+                <span class="tier-badge t1">Tier 1</span>
+                <span class="tier-text">Earnings results, guidance changes, regulatory filings, macro policy announcements, management statements</span>
+            </div>
+            <div class="tier-item">
+                <span class="tier-badge t2">Tier 2</span>
+                <span class="tier-text">Sell-side revisions, credit rating changes, official data releases, industry association reports</span>
+            </div>
+            <div class="tier-item">
+                <span class="tier-badge t3">Tier 3</span>
+                <span class="tier-text">Media narratives, analyst commentary, market speculation, expert network transcripts</span>
+            </div>
+        </div>
+
+        <h3 class="section-title">Capabilities</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Earnings Surprise Measurement</div>
+                <div class="card-text">Standardized Unexpected Earnings (SUE) computation against consensus. Decomposition into revenue vs. margin vs. below-the-line components.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Analyst Revision Intensity</div>
+                <div class="card-text">Breadth, magnitude, and direction of consensus revisions tracked per entity. Rolling revision momentum scored as a z-score signal.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Guidance Change Detection</div>
+                <div class="card-text">Automated extraction and classification of forward guidance from earnings calls and filings. Magnitude scoring relative to prior consensus range.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Research Report Parsing</div>
+                <div class="card-text">Structured extraction of price targets, ratings, key assumptions, and risk factors from sell-side research. Source-weighted credibility scoring.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Cross-Entity Information Spillover</div>
+                <div class="card-text">How does information from one company's report transmit to peers? Lead-lag, magnitude, and regime-conditional spillover coefficients.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Post-Earnings Drift Analysis</div>
+                <div class="card-text">Tracking abnormal returns after earnings for drift persistence, decay rates, and regime-conditional behavior. Saturated vs. exploitable drift identification.</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Data Sources</h3>
+        <table class="data-table">
+            <thead>
+                <tr><th>Source</th><th>Coverage</th><th>Frequency</th><th>Tags</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Earnings Transcripts</td>
+                    <td>Call transcripts, Q&A, prepared remarks</td>
+                    <td>Quarterly</td>
+                    <td><span class="tag tag-orange">info:transcript</span></td>
+                </tr>
+                <tr>
+                    <td>Consensus Estimates</td>
+                    <td>EPS, revenue, EBITDA consensus and revisions</td>
+                    <td>Daily</td>
+                    <td><span class="tag tag-orange">info:consensus</span></td>
+                </tr>
+                <tr>
+                    <td>SEC Filings</td>
+                    <td>10-K, 10-Q, 8-K, proxy, S-1 parsed text</td>
+                    <td>Event-driven</td>
+                    <td><span class="tag tag-blue">filing:sec</span></td>
+                </tr>
+                <tr>
+                    <td>Sell-Side Research</td>
+                    <td>Price targets, ratings, key assumptions</td>
+                    <td>Event-driven</td>
+                    <td><span class="tag tag-green">info:research</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="section-title">Statistical Artifacts (Precomputed)</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Earnings Event Studies</div>
+                <div class="card-text">CAR/CAAR computations around every earnings event. Distribution of abnormal returns by surprise quintile, stored per entity and sector.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Revision-Return Models</div>
+                <div class="card-text">Bayesian posteriors linking revision magnitude to forward returns. Regime-conditional and sector-conditional parameters with MCMC diagnostics.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Spillover Coefficients</div>
+                <div class="card-text">Precomputed cross-entity information transmission weights. Answers "How does SNAP earnings affect META?" with statistical confidence intervals.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding:2rem; border-top:1px solid #21262d; color:#6e7681; font-size:0.75rem;">
+        ClairvoyantAlpha &middot; Information Flow
+    </footer>
+</body>
+</html>

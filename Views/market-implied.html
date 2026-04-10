@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market-Implied Expectations &mdash; ClairvoyantAlpha</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f1419; color: #e6edf3; min-height: 100vh; }
+
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 2rem; background: #161b22; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #e6edf3; }
+        .navbar-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #58a6ff 0%, #a371f7 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; }
+        .navbar-title { font-size: 1.1rem; font-weight: 600; }
+        .navbar-nav { display: flex; gap: 0.4rem; align-items: center; }
+        .navbar-nav a { color: #8b949e; text-decoration: none; font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 6px; transition: all 0.15s; }
+        .navbar-nav a:hover { background: rgba(56, 139, 253, 0.08); color: #c9d1d9; }
+        .navbar-nav a.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; font-weight: 600; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #8b949e; text-decoration: none; font-size: 0.82rem; padding: 1.5rem 2rem 0; transition: color 0.15s; }
+        .back-link:hover { color: #58a6ff; }
+
+        .page-hero { padding: 1.5rem 2rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .page-hero-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .page-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(163, 113, 247, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .page-icon svg { width: 26px; height: 26px; color: #a371f7; }
+        .page-title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        .page-subtitle { color: #8b949e; font-size: 0.95rem; line-height: 1.6; max-width: 720px; }
+
+        .content { max-width: 1100px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.25rem; }
+        .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; color: #e6edf3; }
+        .card-text { font-size: 0.8rem; color: #8b949e; line-height: 1.55; }
+
+        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #c9d1d9; padding-bottom: 0.4rem; border-bottom: 1px solid #21262d; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 2rem; }
+        .data-table th, .data-table td { padding: 0.55rem 0.75rem; text-align: left; border: 1px solid #30363d; }
+        .data-table th { background: #21262d; color: #58a6ff; font-weight: 600; }
+        .data-table tr:nth-child(even) { background: rgba(33, 38, 45, 0.4); }
+        .data-table td { color: #c9d1d9; }
+
+        .formula-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; font-family: 'Cambria Math', Georgia, serif; font-size: 1rem; color: #79c0ff; margin-bottom: 2rem; text-align: center; letter-spacing: 0.02em; }
+        .formula-block .label { font-family: 'Segoe UI', sans-serif; font-size: 0.72rem; color: #6e7681; display: block; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; margin-right: 0.3rem; margin-bottom: 0.3rem; }
+        .tag-purple { background: rgba(163, 113, 247, 0.12); color: #a371f7; }
+        .tag-blue { background: rgba(88, 166, 255, 0.12); color: #58a6ff; }
+
+        .surface-preview { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; text-align: center; }
+        .surface-label { font-size: 0.75rem; color: #6e7681; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .surface-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; max-width: 480px; margin: 0 auto; }
+        .surface-cell { height: 28px; border-radius: 3px; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); }
+
+        @media (max-width: 640px) {
+            .card-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.4rem; }
+            .content, .page-hero { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-brand">
+            <div class="navbar-logo">CA</div>
+            <span class="navbar-title">ClairvoyantAlpha</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="../index.html" class="active">Platform</a>
+            <a href="../home.html">Query Generator</a>
+            <a href="../d.html">DuckDB Browser</a>
+        </div>
+    </nav>
+
+    <a href="../index.html" class="back-link">&larr; Back to Platform</a>
+
+    <section class="page-hero">
+        <div class="page-hero-top">
+            <div class="page-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+            </div>
+            <h1 class="page-title">Market-Implied Expectations</h1>
+        </div>
+        <p class="page-subtitle">
+            The options surface encodes the market's probabilistic beliefs about future outcomes. Implied volatility,
+            skew, term structure, and put-call ratios reveal expectations that price action alone cannot.
+            High &beta; to options skew signals that the market defers to informed traders.
+        </p>
+    </section>
+
+    <div class="content">
+        <div class="formula-block">
+            <span class="label">Implied Expectation Signal</span>
+            S<sub>options,t</sub> = f(&sigma;<sub>IV</sub>(K, T), Skew<sub>t</sub>, Term<sub>t</sub>, P/C<sub>ratio,t</sub>)
+        </div>
+
+        <!-- IV Surface Preview -->
+        <div class="surface-preview">
+            <div class="surface-label">Implied Volatility Surface (Strike &times; Expiry)</div>
+            <div class="surface-grid">
+                <div class="surface-cell" style="background:rgba(88,166,255,0.15)">18</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.2)">20</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.3)">24</div>
+                <div class="surface-cell" style="background:rgba(163,113,247,0.3)">28</div>
+                <div class="surface-cell" style="background:rgba(163,113,247,0.4)">32</div>
+                <div class="surface-cell" style="background:rgba(248,81,73,0.35)">38</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.12)">16</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.18)">18</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.25)">22</div>
+                <div class="surface-cell" style="background:rgba(163,113,247,0.25)">26</div>
+                <div class="surface-cell" style="background:rgba(163,113,247,0.35)">30</div>
+                <div class="surface-cell" style="background:rgba(248,81,73,0.3)">35</div>
+                <div class="surface-cell" style="background:rgba(63,185,80,0.15)">14</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.12)">16</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.18)">19</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.22)">22</div>
+                <div class="surface-cell" style="background:rgba(163,113,247,0.25)">26</div>
+                <div class="surface-cell" style="background:rgba(163,113,247,0.3)">30</div>
+                <div class="surface-cell" style="background:rgba(63,185,80,0.12)">12</div>
+                <div class="surface-cell" style="background:rgba(63,185,80,0.15)">14</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.12)">16</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.18)">19</div>
+                <div class="surface-cell" style="background:rgba(88,166,255,0.22)">22</div>
+                <div class="surface-cell" style="background:rgba(163,113,247,0.22)">25</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Capabilities</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Volatility Surface Modeling</div>
+                <div class="card-text">Full IV surface reconstruction across strikes and expiries. SVI parameterization for arbitrage-free interpolation. Real-time surface updates with delta-hedged P&L tracking.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Skew Analysis</div>
+                <div class="card-text">25-delta risk reversal, butterfly spreads, and skew percentile scoring. Detects asymmetric fear/greed pricing across the strike space.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">IV Term Structure</div>
+                <div class="card-text">Contango/backwardation detection across expiry tenors. Event-driven vol bumps isolated from baseline term structure. Variance swap fair value computation.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Realized vs Implied Divergence</div>
+                <div class="card-text">Volatility risk premium (VRP) tracking. Historical percentile ranking of IV-RV spread. Regime-conditional VRP behavior for optimal vol selling/buying timing.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Gamma & Flow Analysis</div>
+                <div class="card-text">Dealer gamma exposure estimation, max pain levels, and open interest concentration. Identifies mechanical hedging flows that amplify or dampen moves.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Cross-Asset Vol Signals</div>
+                <div class="card-text">VIX term structure, rate vol (MOVE), credit vol, and FX vol correlation analysis. Identifies regime shifts via cross-asset volatility divergence patterns.</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Data Sources</h3>
+        <table class="data-table">
+            <thead>
+                <tr><th>Source</th><th>Coverage</th><th>Frequency</th><th>Tags</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Options Chains</td>
+                    <td>Full chain: strikes, expiries, bid/ask, OI, volume</td>
+                    <td>Real-time / EOD</td>
+                    <td><span class="tag tag-purple">options:chain</span></td>
+                </tr>
+                <tr>
+                    <td>Volatility Indices</td>
+                    <td>VIX, VIX9D, VIX3M, VIX6M, MOVE, VVIX</td>
+                    <td>Daily</td>
+                    <td><span class="tag tag-purple">vol:index</span></td>
+                </tr>
+                <tr>
+                    <td>CFTC COT</td>
+                    <td>Commitments of Traders for major futures</td>
+                    <td>Weekly</td>
+                    <td><span class="tag tag-blue">flow:positioning</span></td>
+                </tr>
+                <tr>
+                    <td>Variance Swaps</td>
+                    <td>Fair value variance and realized variance</td>
+                    <td>Daily</td>
+                    <td><span class="tag tag-purple">vol:variance</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="section-title">Statistical Artifacts (Precomputed)</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">IV Surface Snapshots</div>
+                <div class="card-text">Historical surface states stored for backtesting. Allows time-travel to any historical options state for event study analysis.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Skew Percentile Scores</div>
+                <div class="card-text">Rolling percentile of 25-delta skew relative to 1Y, 3Y, and 5Y lookbacks. Regime-tagged for conditional analysis.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">VRP Models</div>
+                <div class="card-text">MCMC-estimated volatility risk premium distributions. Posterior probability that VRP exceeds transaction costs under current regime.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding:2rem; border-top:1px solid #21262d; color:#6e7681; font-size:0.75rem;">
+        ClairvoyantAlpha &middot; Market-Implied Expectations
+    </footer>
+</body>
+</html>

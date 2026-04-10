@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Events &mdash; ClairvoyantAlpha</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f1419; color: #e6edf3; min-height: 100vh; }
+
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 2rem; background: #161b22; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #e6edf3; }
+        .navbar-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #58a6ff 0%, #a371f7 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; }
+        .navbar-title { font-size: 1.1rem; font-weight: 600; }
+        .navbar-nav { display: flex; gap: 0.4rem; align-items: center; }
+        .navbar-nav a { color: #8b949e; text-decoration: none; font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 6px; transition: all 0.15s; }
+        .navbar-nav a:hover { background: rgba(56, 139, 253, 0.08); color: #c9d1d9; }
+        .navbar-nav a.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; font-weight: 600; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #8b949e; text-decoration: none; font-size: 0.82rem; padding: 1.5rem 2rem 0; transition: color 0.15s; }
+        .back-link:hover { color: #58a6ff; }
+
+        .page-hero { padding: 1.5rem 2rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .page-hero-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .page-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(248, 81, 73, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .page-icon svg { width: 26px; height: 26px; color: #f85149; }
+        .page-title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        .page-subtitle { color: #8b949e; font-size: 0.95rem; line-height: 1.6; max-width: 720px; }
+
+        .content { max-width: 1100px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.25rem; }
+        .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; color: #e6edf3; }
+        .card-text { font-size: 0.8rem; color: #8b949e; line-height: 1.55; }
+
+        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #c9d1d9; padding-bottom: 0.4rem; border-bottom: 1px solid #21262d; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 2rem; }
+        .data-table th, .data-table td { padding: 0.55rem 0.75rem; text-align: left; border: 1px solid #30363d; }
+        .data-table th { background: #21262d; color: #58a6ff; font-weight: 600; }
+        .data-table tr:nth-child(even) { background: rgba(33, 38, 45, 0.4); }
+        .data-table td { color: #c9d1d9; }
+
+        .formula-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; font-family: 'Cambria Math', Georgia, serif; font-size: 1rem; color: #79c0ff; margin-bottom: 2rem; text-align: center; letter-spacing: 0.02em; }
+        .formula-block .label { font-family: 'Segoe UI', sans-serif; font-size: 0.72rem; color: #6e7681; display: block; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; margin-right: 0.3rem; margin-bottom: 0.3rem; }
+        .tag-red { background: rgba(248, 81, 73, 0.12); color: #f85149; }
+        .tag-blue { background: rgba(88, 166, 255, 0.12); color: #58a6ff; }
+        .tag-orange { background: rgba(210, 153, 34, 0.12); color: #d29922; }
+
+        /* Event Timeline Preview */
+        .timeline-preview { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
+        .timeline-label { font-size: 0.75rem; color: #6e7681; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+        .timeline { position: relative; padding-left: 1.5rem; }
+        .timeline::before { content: ''; position: absolute; left: 5px; top: 0; bottom: 0; width: 2px; background: #30363d; }
+        .timeline-event { position: relative; padding: 0.6rem 0 0.6rem 1.25rem; }
+        .timeline-event::before { content: ''; position: absolute; left: -1.5rem; top: 0.85rem; width: 10px; height: 10px; border-radius: 50%; border: 2px solid; }
+        .timeline-event:nth-child(1)::before { border-color: #3fb950; background: rgba(63, 185, 80, 0.3); }
+        .timeline-event:nth-child(2)::before { border-color: #f85149; background: rgba(248, 81, 73, 0.3); }
+        .timeline-event:nth-child(3)::before { border-color: #d29922; background: rgba(210, 153, 34, 0.3); }
+        .timeline-event:nth-child(4)::before { border-color: #58a6ff; background: rgba(88, 166, 255, 0.3); }
+        .timeline-event:nth-child(5)::before { border-color: #a371f7; background: rgba(163, 113, 247, 0.3); }
+        .event-title { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .event-meta { font-size: 0.72rem; color: #8b949e; }
+        .event-prob { font-family: 'Consolas', monospace; color: #79c0ff; }
+
+        /* Z-score threshold bands */
+        .threshold-bands { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 2rem; }
+        .threshold-band { text-align: center; padding: 0.75rem; border-radius: 8px; border: 1px solid #30363d; }
+        .threshold-range { font-size: 0.9rem; font-weight: 700; font-family: 'Consolas', monospace; margin-bottom: 0.25rem; }
+        .threshold-label { font-size: 0.7rem; color: #8b949e; }
+
+        @media (max-width: 640px) {
+            .card-grid, .threshold-bands { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.4rem; }
+            .content, .page-hero { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-brand">
+            <div class="navbar-logo">CA</div>
+            <span class="navbar-title">ClairvoyantAlpha</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="../index.html" class="active">Platform</a>
+            <a href="../home.html">Query Generator</a>
+            <a href="../d.html">DuckDB Browser</a>
+        </div>
+    </nav>
+
+    <a href="../index.html" class="back-link">&larr; Back to Platform</a>
+
+    <section class="page-hero">
+        <div class="page-hero-top">
+            <div class="page-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+            </div>
+            <h1 class="page-title">Discrete Events</h1>
+        </div>
+        <p class="page-subtitle">
+            Catalysts are not binary &mdash; they carry probability, expected magnitude, direction, and resolution windows.
+            An "event" is a statistically abnormal market response that demands explanation. News is searched
+            <em>after</em> the event is detected, never before. This ordering prevents narrative hallucination.
+        </p>
+    </section>
+
+    <div class="content">
+        <div class="formula-block">
+            <span class="label">Catalyst Pricing Term</span>
+            &Sigma;<sub>k</sub> &gamma;<sub>k</sub> &middot; E[Event<sub>k</sub>] = &Sigma;<sub>k</sub> &gamma;<sub>k</sub> &middot; P(event) &middot; E[magnitude | event]
+        </div>
+
+        <!-- Z-Score Thresholds -->
+        <h3 class="section-title">Event Detection Thresholds (Z-Score)</h3>
+        <div class="threshold-bands">
+            <div class="threshold-band" style="background: rgba(88, 166, 255, 0.06);">
+                <div class="threshold-range" style="color: #58a6ff;">1.0 &ndash; 1.5&sigma;</div>
+                <div class="threshold-label">Unusual</div>
+            </div>
+            <div class="threshold-band" style="background: rgba(210, 153, 34, 0.06);">
+                <div class="threshold-range" style="color: #d29922;">1.5 &ndash; 2.0&sigma;</div>
+                <div class="threshold-label">Likely Catalyst</div>
+            </div>
+            <div class="threshold-band" style="background: rgba(248, 81, 73, 0.06);">
+                <div class="threshold-range" style="color: #f85149;">2.0 &ndash; 3.0&sigma;</div>
+                <div class="threshold-label">Strong Event</div>
+            </div>
+            <div class="threshold-band" style="background: rgba(163, 113, 247, 0.06);">
+                <div class="threshold-range" style="color: #a371f7;">&gt; 3.0&sigma;</div>
+                <div class="threshold-label">Structural Shock</div>
+            </div>
+        </div>
+
+        <!-- Event Timeline -->
+        <div class="timeline-preview">
+            <div class="timeline-label">Sample Catalyst Timeline &mdash; AAPL</div>
+            <div class="timeline">
+                <div class="timeline-event">
+                    <div class="event-title">Q2 Earnings Release</div>
+                    <div class="event-meta">Scheduled &middot; <span class="event-prob">P = 1.00</span> &middot; Expected &Delta;: &plusmn;4.2% &middot; 12 days</div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-title">Antitrust Ruling</div>
+                    <div class="event-meta">Regulatory &middot; <span class="event-prob">P = 0.35</span> &middot; Expected &Delta;: -6.1% &middot; 45 days</div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-title">Services Revenue Reacceleration</div>
+                    <div class="event-meta">Fundamental &middot; <span class="event-prob">P = 0.62</span> &middot; Expected &Delta;: +3.8% &middot; 90 days</div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-title">China Tariff Escalation</div>
+                    <div class="event-meta">Geopolitical &middot; <span class="event-prob">P = 0.22</span> &middot; Expected &Delta;: -8.5% &middot; 120 days</div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-title">New Product Category Launch</div>
+                    <div class="event-meta">Strategic &middot; <span class="event-prob">P = 0.48</span> &middot; Expected &Delta;: +5.2% &middot; 180 days</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Capabilities</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Poisson / Hawkes Process Modeling</div>
+                <div class="card-text">Event arrival timing modeled as Poisson (baseline) or Hawkes (self-exciting) processes. Entity-specific, regime-adjusted, and seasonally calibrated intensity parameters.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Event Study Framework (CAR/CAAR)</div>
+                <div class="card-text">Cumulative Abnormal Return computation with market model, sector model, or factor model benchmarks. Estimation and event windows configurable per study.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Conditional Return Distributions</div>
+                <div class="card-text">Per event type: mean return path, distribution of outcomes, skew, tail risk, volatility decay, drawdown probability, and time-to-mean-reversion.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Mechanism Attribution</div>
+                <div class="card-text">CFA-grade economic mechanism mapping: cashflow revision, discount rate shift, margin pressure, demand shock, policy risk. Ranked by plausibility, timing, and precedent.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Event Taxonomy & Pattern Library</div>
+                <div class="card-text">Canonical event type tags reused across history: earnings surprise, guidance cut, regulatory overhang, liquidity squeeze. Each with computed outcome distributions.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Catalyst Risk Pricing</div>
+                <div class="card-text">How much catalyst risk is priced into the current stock price? Decomposition of price into fundamental anchor + priced catalysts + residual uncertainty.</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Event Object Schema</h3>
+        <table class="data-table">
+            <thead>
+                <tr><th>Field</th><th>Description</th><th>Example</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>entity</td>
+                    <td>Company, sector, or macro entity</td>
+                    <td>entity:company:AAPL</td>
+                </tr>
+                <tr>
+                    <td>signal_trigger</td>
+                    <td>Signal(s) that breached threshold</td>
+                    <td>abnormal_return: 2.3&sigma;</td>
+                </tr>
+                <tr>
+                    <td>event_type</td>
+                    <td>Canonical event classification</td>
+                    <td><span class="tag tag-red">event:earnings_surprise</span></td>
+                </tr>
+                <tr>
+                    <td>probability</td>
+                    <td>Bayesian posterior of occurrence</td>
+                    <td>0.72</td>
+                </tr>
+                <tr>
+                    <td>expected_magnitude</td>
+                    <td>Conditional return distribution</td>
+                    <td>&mu;: +3.2%, &sigma;: 1.8%</td>
+                </tr>
+                <tr>
+                    <td>resolution_window</td>
+                    <td>Time until catalyst resolves</td>
+                    <td>12 days</td>
+                </tr>
+                <tr>
+                    <td>regime_context</td>
+                    <td>Active macro regime at event time</td>
+                    <td><span class="tag tag-blue">disinflation_growth</span></td>
+                </tr>
+                <tr>
+                    <td>mechanism</td>
+                    <td>Economic mechanism attribution</td>
+                    <td><span class="tag tag-orange">mechanism:cashflow_revision</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="section-title">Statistical Artifacts (Precomputed)</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Event Study Library</div>
+                <div class="card-text">Every historical event with CAR/CAAR, abnormal return distribution, estimation window parameters, and regime tag. Immutable once created.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Hawkes Process Parameters</div>
+                <div class="card-text">Self-exciting intensity models per entity and event type. Decay rates, baseline intensities, and jump magnitudes estimated via MLE with bootstrap confidence.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Catalyst Expected Value Tables</div>
+                <div class="card-text">P(event) x E[magnitude | event] tables per catalyst type and entity. Updated continuously as new data arrives. Direct input to the pricing equation.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding:2rem; border-top:1px solid #21262d; color:#6e7681; font-size:0.75rem;">
+        ClairvoyantAlpha &middot; Discrete Events
+    </footer>
+</body>
+</html>

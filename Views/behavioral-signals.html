@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Behavioral Signals &mdash; ClairvoyantAlpha</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f1419; color: #e6edf3; min-height: 100vh; }
+
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 2rem; background: #161b22; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #e6edf3; }
+        .navbar-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #58a6ff 0%, #a371f7 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; }
+        .navbar-title { font-size: 1.1rem; font-weight: 600; }
+        .navbar-nav { display: flex; gap: 0.4rem; align-items: center; }
+        .navbar-nav a { color: #8b949e; text-decoration: none; font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 6px; transition: all 0.15s; }
+        .navbar-nav a:hover { background: rgba(56, 139, 253, 0.08); color: #c9d1d9; }
+        .navbar-nav a.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; font-weight: 600; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #8b949e; text-decoration: none; font-size: 0.82rem; padding: 1.5rem 2rem 0; transition: color 0.15s; }
+        .back-link:hover { color: #58a6ff; }
+
+        .page-hero { padding: 1.5rem 2rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .page-hero-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .page-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(121, 192, 255, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .page-icon svg { width: 26px; height: 26px; color: #79c0ff; }
+        .page-title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        .page-subtitle { color: #8b949e; font-size: 0.95rem; line-height: 1.6; max-width: 720px; }
+
+        .content { max-width: 1100px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.25rem; }
+        .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; color: #e6edf3; }
+        .card-text { font-size: 0.8rem; color: #8b949e; line-height: 1.55; }
+
+        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #c9d1d9; padding-bottom: 0.4rem; border-bottom: 1px solid #21262d; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 2rem; }
+        .data-table th, .data-table td { padding: 0.55rem 0.75rem; text-align: left; border: 1px solid #30363d; }
+        .data-table th { background: #21262d; color: #58a6ff; font-weight: 600; }
+        .data-table tr:nth-child(even) { background: rgba(33, 38, 45, 0.4); }
+        .data-table td { color: #c9d1d9; }
+
+        .formula-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; font-family: 'Cambria Math', Georgia, serif; font-size: 1rem; color: #79c0ff; margin-bottom: 2rem; text-align: center; letter-spacing: 0.02em; }
+        .formula-block .label { font-family: 'Segoe UI', sans-serif; font-size: 0.72rem; color: #6e7681; display: block; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; margin-right: 0.3rem; margin-bottom: 0.3rem; }
+        .tag-cyan { background: rgba(121, 192, 255, 0.12); color: #79c0ff; }
+        .tag-orange { background: rgba(210, 153, 34, 0.12); color: #d29922; }
+        .tag-green { background: rgba(63, 185, 80, 0.12); color: #3fb950; }
+
+        .signal-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid #21262d; }
+        .signal-bar:last-child { border-bottom: none; }
+        .signal-label { font-size: 0.8rem; color: #c9d1d9; width: 140px; flex-shrink: 0; }
+        .signal-track { flex: 1; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; }
+        .signal-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+        .signal-value { font-size: 0.75rem; color: #8b949e; width: 40px; text-align: right; flex-shrink: 0; }
+        .signal-preview { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.25rem; margin-bottom: 2rem; }
+        .signal-preview-title { font-size: 0.75rem; color: #6e7681; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; }
+
+        @media (max-width: 640px) {
+            .card-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.4rem; }
+            .content, .page-hero { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-brand">
+            <div class="navbar-logo">CA</div>
+            <span class="navbar-title">ClairvoyantAlpha</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="../index.html" class="active">Platform</a>
+            <a href="../home.html">Query Generator</a>
+            <a href="../d.html">DuckDB Browser</a>
+        </div>
+    </nav>
+
+    <a href="../index.html" class="back-link">&larr; Back to Platform</a>
+
+    <section class="page-hero">
+        <div class="page-hero-top">
+            <div class="page-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a8 8 0 0 0-8 8c0 3.5 2 6 4 7.5V20h8v-2.5c2-1.5 4-4 4-7.5a8 8 0 0 0-8-8z"/><line x1="10" y1="22" x2="14" y2="22"/>
+                </svg>
+            </div>
+            <h1 class="page-title">Behavioral Signals</h1>
+        </div>
+        <p class="page-subtitle">
+            News sentiment, social media tone, and management language patterns encode behavioral biases and
+            narrative momentum. Tags are not labels &mdash; they are atomic claims with polarity, certainty,
+            and scope that prevent hallucination and enable causal reasoning.
+        </p>
+    </section>
+
+    <div class="content">
+        <div class="formula-block">
+            <span class="label">Sentiment Signal Aggregation</span>
+            S<sub>sentiment,t</sub> = &Sigma;<sub>c</sub> confidence<sub>c</sub> &middot; polarity<sub>c</sub> &middot; scope<sub>c</sub>
+        </div>
+
+        <!-- Sentiment Preview -->
+        <div class="signal-preview">
+            <div class="signal-preview-title">Sample Sentiment Dashboard &mdash; AAPL</div>
+            <div class="signal-bar">
+                <span class="signal-label">News Sentiment</span>
+                <div class="signal-track"><div class="signal-fill" style="width:68%; background:#3fb950;"></div></div>
+                <span class="signal-value">+0.34</span>
+            </div>
+            <div class="signal-bar">
+                <span class="signal-label">Social Sentiment</span>
+                <div class="signal-track"><div class="signal-fill" style="width:55%; background:#58a6ff;"></div></div>
+                <span class="signal-value">+0.12</span>
+            </div>
+            <div class="signal-bar">
+                <span class="signal-label">Mgmt Language</span>
+                <div class="signal-track"><div class="signal-fill" style="width:40%; background:#d29922;"></div></div>
+                <span class="signal-value">-0.08</span>
+            </div>
+            <div class="signal-bar">
+                <span class="signal-label">Narrative Momentum</span>
+                <div class="signal-track"><div class="signal-fill" style="width:72%; background:#a371f7;"></div></div>
+                <span class="signal-value">+0.41</span>
+            </div>
+        </div>
+
+        <h3 class="section-title">Capabilities</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Claim-Level Extraction</div>
+                <div class="card-text">Tags are not words &mdash; they are claims. "Input cost increase," "pricing resistance," "demand softening." Each with polarity, certainty, scope, and entity linkage.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Management Language Patterns</div>
+                <div class="card-text">Detection of hedging, non-committal guidance, cost-focus shifts, and macro-blame patterns. These correlate strongly with forward returns and have high informational content.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Narrative Correlation Analysis</div>
+                <div class="card-text">Shared narrative identification across entities. Detects when "AI capex" or "regulatory risk" narratives cluster stocks, distinguishing signal from noise.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Sentiment Divergence Detection</div>
+                <div class="card-text">When sentiment disagrees with fundamentals or price action, that divergence is itself a tradable signal. Tracked and scored as a z-score anomaly.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Source Credibility Scoring</div>
+                <div class="card-text">Not all sources are equal. Institutional research carries more weight than social posts. Source-specific hit rates calibrated against historical price responses.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Temporal Sentiment Decay</div>
+                <div class="card-text">How quickly does sentiment impact fade? Half-life estimation per signal type and entity, critical for position timing and sizing.</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Data Sources</h3>
+        <table class="data-table">
+            <thead>
+                <tr><th>Source</th><th>Coverage</th><th>Frequency</th><th>Tags</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>News Articles</td>
+                    <td>Press releases, financial news, industry publications</td>
+                    <td>Real-time</td>
+                    <td><span class="tag tag-cyan">sentiment:news</span></td>
+                </tr>
+                <tr>
+                    <td>Social Media</td>
+                    <td>Financial forums, social platforms, community feeds</td>
+                    <td>Real-time</td>
+                    <td><span class="tag tag-cyan">sentiment:social</span></td>
+                </tr>
+                <tr>
+                    <td>Earnings Calls</td>
+                    <td>Management tone, word choice, Q&A dynamics</td>
+                    <td>Quarterly</td>
+                    <td><span class="tag tag-orange">language:mgmt</span></td>
+                </tr>
+                <tr>
+                    <td>Risk Factor Filings</td>
+                    <td>10-K risk factor language evolution over time</td>
+                    <td>Annual</td>
+                    <td><span class="tag tag-green">language:risk</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="section-title">Statistical Artifacts (Precomputed)</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Sentiment-Return Models</div>
+                <div class="card-text">MCMC posteriors linking sentiment shifts to forward returns at 1d, 5d, 20d horizons. Regime-conditional and sector-conditional parameters.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Narrative Embedding Clusters</div>
+                <div class="card-text">Dense vector representations of narrative themes, clustered and tracked over time. Allows semantic similarity search across historical narrative states.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Language Pattern Library</div>
+                <div class="card-text">Canonical management language patterns with historical hit rates, false positive rates, and forward return distributions per pattern type.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding:2rem; border-top:1px solid #21262d; color:#6e7681; font-size:0.75rem;">
+        ClairvoyantAlpha &middot; Behavioral Signals
+    </footer>
+</body>
+</html>

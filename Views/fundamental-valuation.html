@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundamental Valuation &mdash; ClairvoyantAlpha</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f1419; color: #e6edf3; min-height: 100vh; }
+
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 2rem; background: #161b22; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #e6edf3; }
+        .navbar-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #58a6ff 0%, #a371f7 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; }
+        .navbar-title { font-size: 1.1rem; font-weight: 600; }
+        .navbar-nav { display: flex; gap: 0.4rem; align-items: center; }
+        .navbar-nav a { color: #8b949e; text-decoration: none; font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 6px; transition: all 0.15s; }
+        .navbar-nav a:hover { background: rgba(56, 139, 253, 0.08); color: #c9d1d9; }
+        .navbar-nav a.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; font-weight: 600; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #8b949e; text-decoration: none; font-size: 0.82rem; padding: 1.5rem 2rem 0; transition: color 0.15s; }
+        .back-link:hover { color: #58a6ff; }
+
+        .page-hero { padding: 1.5rem 2rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .page-hero-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .page-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(88, 166, 255, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .page-icon svg { width: 26px; height: 26px; color: #58a6ff; }
+        .page-title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        .page-subtitle { color: #8b949e; font-size: 0.95rem; line-height: 1.6; max-width: 720px; }
+
+        .content { max-width: 1100px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.25rem; }
+        .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; color: #e6edf3; }
+        .card-text { font-size: 0.8rem; color: #8b949e; line-height: 1.55; }
+
+        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #c9d1d9; padding-bottom: 0.4rem; border-bottom: 1px solid #21262d; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 2rem; }
+        .data-table th, .data-table td { padding: 0.55rem 0.75rem; text-align: left; border: 1px solid #30363d; }
+        .data-table th { background: #21262d; color: #58a6ff; font-weight: 600; }
+        .data-table tr:nth-child(even) { background: rgba(33, 38, 45, 0.4); }
+        .data-table td { color: #c9d1d9; }
+
+        .formula-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; font-family: 'Cambria Math', Georgia, serif; font-size: 1rem; color: #79c0ff; margin-bottom: 2rem; text-align: center; letter-spacing: 0.02em; }
+        .formula-block .label { font-family: 'Segoe UI', sans-serif; font-size: 0.72rem; color: #6e7681; display: block; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; margin-right: 0.3rem; margin-bottom: 0.3rem; }
+        .tag-blue { background: rgba(88, 166, 255, 0.12); color: #58a6ff; }
+        .tag-green { background: rgba(63, 185, 80, 0.12); color: #3fb950; }
+        .tag-purple { background: rgba(163, 113, 247, 0.12); color: #a371f7; }
+        .tag-orange { background: rgba(210, 153, 34, 0.12); color: #d29922; }
+
+        @media (max-width: 640px) {
+            .card-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.4rem; }
+            .content, .page-hero { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-brand">
+            <div class="navbar-logo">CA</div>
+            <span class="navbar-title">ClairvoyantAlpha</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="../index.html" class="active">Platform</a>
+            <a href="../home.html">Query Generator</a>
+            <a href="../d.html">DuckDB Browser</a>
+        </div>
+    </nav>
+
+    <a href="../index.html" class="back-link">&larr; Back to Platform</a>
+
+    <section class="page-hero">
+        <div class="page-hero-top">
+            <div class="page-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/>
+                </svg>
+            </div>
+            <h1 class="page-title">Fundamental Valuation</h1>
+        </div>
+        <p class="page-subtitle">
+            DCF modeling with footnote-level granularity, dynamically selected discount rates conditional on macro regime,
+            comparable company analysis, and earnings quality assessment. This is the valuation prior &mdash;
+            <em>V<sup>DCF</sup><sub>t</sub></em> &mdash; the anchor from which all other signals are measured.
+        </p>
+    </section>
+
+    <div class="content">
+        <div class="formula-block">
+            <span class="label">Intrinsic Value Anchor</span>
+            V<sup>DCF</sup><sub>t</sub> = &Sigma;<sub>n=1..N</sub> FCF<sub>n</sub> / (1 + r<sub>regime</sub>)<sup>n</sup> + TV / (1 + r<sub>regime</sub>)<sup>N</sup>
+        </div>
+
+        <h3 class="section-title">Capabilities</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Footnote-Level DCF</div>
+                <div class="card-text">Full financial statement decomposition with line-item granularity. Revenue segments, operating leverage, capex cycles, working capital dynamics, and terminal value sensitivity.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Regime-Conditional Discount Rates</div>
+                <div class="card-text">Interest rates dynamically selected based on current macro regime state. Risk premia adjust for inflation expectations, credit conditions, and policy stance.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Comparable Analysis</div>
+                <div class="card-text">Peer-relative valuation using EV/EBITDA, P/E, P/FCF across sector cohorts. Multiples decomposed by growth, margin, and capital intensity.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Earnings Quality Scoring</div>
+                <div class="card-text">Accrual models, cash conversion tracking, revenue recognition flags, and footnote-derived risk indicators for each reporting period.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Scenario Modeling</div>
+                <div class="card-text">Bull / base / bear intrinsic values with mechanically defined assumptions per regime. Posterior probability weighting across scenarios.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Valuation Gap Analysis</div>
+                <div class="card-text">Market price vs. intrinsic value z-score tracking. Historical percentile ranking of current mispricing relative to own history and sector peers.</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Data Sources</h3>
+        <table class="data-table">
+            <thead>
+                <tr><th>Source</th><th>Coverage</th><th>Frequency</th><th>Tags</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>SEC EDGAR</td>
+                    <td>10-K, 10-Q, 8-K filings &mdash; XBRL parsed</td>
+                    <td>Quarterly</td>
+                    <td><span class="tag tag-blue">fs:income</span><span class="tag tag-blue">fs:balance</span><span class="tag tag-blue">fs:cashflow</span></td>
+                </tr>
+                <tr>
+                    <td>BEA / FRED</td>
+                    <td>GDP deflator, PCE, corporate profits aggregate</td>
+                    <td>Monthly / Quarterly</td>
+                    <td><span class="tag tag-green">macro:growth</span><span class="tag tag-green">macro:inflation</span></td>
+                </tr>
+                <tr>
+                    <td>Treasury Yields</td>
+                    <td>Risk-free curve across tenors, TIPS real yields</td>
+                    <td>Daily</td>
+                    <td><span class="tag tag-purple">rates:nominal</span><span class="tag tag-purple">rates:real</span></td>
+                </tr>
+                <tr>
+                    <td>Company Filings</td>
+                    <td>Segment data, footnotes, management discussion</td>
+                    <td>Quarterly</td>
+                    <td><span class="tag tag-orange">filing:segment</span><span class="tag tag-orange">filing:footnote</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="section-title">Statistical Artifacts (Precomputed)</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Valuation Distributions</div>
+                <div class="card-text">Posterior distributions of intrinsic value under each scenario, stored as compressed samples with HDI intervals and probability of undervaluation.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Factor Decomposition</div>
+                <div class="card-text">Rolling and regime-conditional betas to Fama-French factors, momentum, liquidity, and volatility. Shapley attribution of valuation gap drivers.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Earnings Persistence Models</div>
+                <div class="card-text">MCMC-derived posteriors for accrual quality, revenue durability, and margin sustainability metrics per reporting entity.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding:2rem; border-top:1px solid #21262d; color:#6e7681; font-size:0.75rem;">
+        ClairvoyantAlpha &middot; Fundamental Valuation
+    </footer>
+</body>
+</html>

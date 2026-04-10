@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacroEconomic Data &mdash; ClairvoyantAlpha</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f1419; color: #e6edf3; min-height: 100vh; }
+
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 2rem; background: #161b22; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #e6edf3; }
+        .navbar-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #58a6ff 0%, #a371f7 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; }
+        .navbar-title { font-size: 1.1rem; font-weight: 600; }
+        .navbar-nav { display: flex; gap: 0.4rem; align-items: center; }
+        .navbar-nav a { color: #8b949e; text-decoration: none; font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 6px; transition: all 0.15s; }
+        .navbar-nav a:hover { background: rgba(56, 139, 253, 0.08); color: #c9d1d9; }
+        .navbar-nav a.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; font-weight: 600; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #8b949e; text-decoration: none; font-size: 0.82rem; padding: 1.5rem 2rem 0; transition: color 0.15s; }
+        .back-link:hover { color: #58a6ff; }
+
+        .page-hero { padding: 1.5rem 2rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .page-hero-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .page-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(63, 185, 80, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .page-icon svg { width: 26px; height: 26px; color: #3fb950; }
+        .page-title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        .page-subtitle { color: #8b949e; font-size: 0.95rem; line-height: 1.6; max-width: 720px; }
+
+        .content { max-width: 1100px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.25rem; }
+        .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; color: #e6edf3; }
+        .card-text { font-size: 0.8rem; color: #8b949e; line-height: 1.55; }
+
+        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #c9d1d9; padding-bottom: 0.4rem; border-bottom: 1px solid #21262d; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 2rem; }
+        .data-table th, .data-table td { padding: 0.55rem 0.75rem; text-align: left; border: 1px solid #30363d; }
+        .data-table th { background: #21262d; color: #58a6ff; font-weight: 600; }
+        .data-table tr:nth-child(even) { background: rgba(33, 38, 45, 0.4); }
+        .data-table td { color: #c9d1d9; }
+
+        .formula-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; font-family: 'Cambria Math', Georgia, serif; font-size: 1rem; color: #79c0ff; margin-bottom: 2rem; text-align: center; letter-spacing: 0.02em; }
+        .formula-block .label { font-family: 'Segoe UI', sans-serif; font-size: 0.72rem; color: #6e7681; display: block; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; margin-right: 0.3rem; margin-bottom: 0.3rem; }
+        .tag-blue { background: rgba(88, 166, 255, 0.12); color: #58a6ff; }
+        .tag-green { background: rgba(63, 185, 80, 0.12); color: #3fb950; }
+        .tag-purple { background: rgba(163, 113, 247, 0.12); color: #a371f7; }
+
+        .regime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+        .regime-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; border-left: 3px solid; }
+        .regime-card.growth { border-left-color: #3fb950; }
+        .regime-card.disinflation { border-left-color: #58a6ff; }
+        .regime-card.tightening { border-left-color: #d29922; }
+        .regime-card.crisis { border-left-color: #f85149; }
+        .regime-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .regime-desc { font-size: 0.75rem; color: #8b949e; line-height: 1.4; }
+
+        @media (max-width: 640px) {
+            .card-grid, .regime-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.4rem; }
+            .content, .page-hero { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-brand">
+            <div class="navbar-logo">CA</div>
+            <span class="navbar-title">ClairvoyantAlpha</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="../index.html" class="active">Platform</a>
+            <a href="../home.html">Query Generator</a>
+            <a href="../d.html">DuckDB Browser</a>
+        </div>
+    </nav>
+
+    <a href="../index.html" class="back-link">&larr; Back to Platform</a>
+
+    <section class="page-hero">
+        <div class="page-hero-top">
+            <div class="page-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/>
+                </svg>
+            </div>
+            <h1 class="page-title">MacroEconomic Data</h1>
+        </div>
+        <p class="page-subtitle">
+            800,000+ time series from FRED, IMF, BLS, BEA, World Bank, and EIA. HMM/GMM regime clustering produces
+            parsimonious macro states with Markov transition probabilities. Z-score event detection identifies
+            statistically abnormal market responses demanding explanation.
+        </p>
+    </section>
+
+    <div class="content">
+        <div class="formula-block">
+            <span class="label">Macro Regime Conditional Model</span>
+            E[R<sub>k,t</sub> | M<sub>t</sub>] &middot; &Sigma;<sub>i&isin;F<sub>k</sub></sub> &beta;<sub>i,k,t</sub> S<sub>i,t</sub>
+        </div>
+
+        <h3 class="section-title">Regime Classification</h3>
+        <div class="regime-grid">
+            <div class="regime-card growth">
+                <div class="regime-name">Growth Expansion</div>
+                <div class="regime-desc">Rising GDP, low unemployment, earnings growth. Equities reward momentum, options vol compressed.</div>
+            </div>
+            <div class="regime-card disinflation">
+                <div class="regime-name">Disinflation</div>
+                <div class="regime-desc">Falling inflation, rate cut expectations, duration assets bid. Growth factors dominate.</div>
+            </div>
+            <div class="regime-card tightening">
+                <div class="regime-name">Policy Tightening</div>
+                <div class="regime-desc">Rising rates, hawkish policy, multiple compression. Balance sheet quality differentiates.</div>
+            </div>
+            <div class="regime-card crisis">
+                <div class="regime-name">Liquidity Crisis</div>
+                <div class="regime-desc">Correlation spikes, credit spreads widen, funding stress. Defensive positioning, tail hedging.</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Capabilities</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">HMM / GMM Regime Clustering</div>
+                <div class="card-text">Unsupervised identification of latent macro states from normalized indicator vectors. BIC-optimized cluster count with soft membership probabilities.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Transition Matrices</div>
+                <div class="card-text">Markov chain state-to-state transition probabilities with historical calibration. Fan charts for regime evolution over 3/6/12 month horizons.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Z-Score Event Detection</div>
+                <div class="card-text">Multi-tier thresholding (1.5&sigma; unusual, 2.0&sigma; likely catalyst, 3.0&sigma;+ structural shock) on rolling-window normalized indicators.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Indicator Heat Maps</div>
+                <div class="card-text">Visual representation of economic indicator states across categories: growth, labor, inflation, credit, housing, trade. Color-coded by z-score magnitude.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Vintage-Aware Retrieval</div>
+                <div class="card-text">ALFRED-style "as-of" data access. Every query returns what was known when &mdash; preventing look-ahead bias in backtesting and regime assignment.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Cross-Indicator Correlation</div>
+                <div class="card-text">Distance correlation, tail dependence, and copula fits between indicators. Significance scoring to identify statistically potent co-movements.</div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Data Sources</h3>
+        <table class="data-table">
+            <thead>
+                <tr><th>Source</th><th>Coverage</th><th>Series Count</th><th>Tags</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>FRED (St. Louis Fed)</td>
+                    <td>GDP, CPI, employment, rates, money supply, credit</td>
+                    <td>800,000+</td>
+                    <td><span class="tag tag-green">macro:fred</span></td>
+                </tr>
+                <tr>
+                    <td>BLS</td>
+                    <td>CES, CPS, PPI, CPI components, ECI</td>
+                    <td>~50,000</td>
+                    <td><span class="tag tag-green">macro:labor</span><span class="tag tag-green">macro:prices</span></td>
+                </tr>
+                <tr>
+                    <td>BEA</td>
+                    <td>NIPA, GDP components, personal income, PCE</td>
+                    <td>~20,000</td>
+                    <td><span class="tag tag-blue">macro:gdp</span></td>
+                </tr>
+                <tr>
+                    <td>IMF / World Bank</td>
+                    <td>Cross-country macro, WDI, IFS, exchange rates</td>
+                    <td>~100,000</td>
+                    <td><span class="tag tag-purple">macro:global</span></td>
+                </tr>
+                <tr>
+                    <td>EIA</td>
+                    <td>Oil/gas inventories, production, refinery, prices</td>
+                    <td>~5,000</td>
+                    <td><span class="tag tag-green">macro:energy</span></td>
+                </tr>
+                <tr>
+                    <td>Federal Reserve</td>
+                    <td>H.8 banking, SLOOS, balance sheet, reserves</td>
+                    <td>~10,000</td>
+                    <td><span class="tag tag-blue">macro:credit</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="section-title">Statistical Artifacts (Precomputed)</h3>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Regime Posterior Probabilities</div>
+                <div class="card-text">Real-time posterior probability of each macro state, updated as new indicators release. Bayesian combination of HMM output with latest data likelihood.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Macro Beta Exposures</div>
+                <div class="card-text">Per-asset sensitivity to each macro regime. Rolling + regime-conditional betas stored as statistical artifacts with confidence intervals.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Indicator Significance Scores</div>
+                <div class="card-text">LASSO-selected feature importances, mutual information metrics, and ANOVA F-statistics measuring each indicator's power to distinguish regimes.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding:2rem; border-top:1px solid #21262d; color:#6e7681; font-size:0.75rem;">
+        ClairvoyantAlpha &middot; MacroEconomic Data
+    </footer>
+</body>
+</html>
