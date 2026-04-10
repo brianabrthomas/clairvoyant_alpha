@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClairvoyantAlpha</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f1419;
+            color: #e6edf3;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem 2rem;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: #e6edf3;
+        }
+        .navbar-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #58a6ff 0%, #a371f7 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #fff;
+        }
+        .navbar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        .navbar-nav {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+        .navbar-nav a {
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 0.78rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .navbar-nav a:hover { background: rgba(56, 139, 253, 0.08); color: #c9d1d9; }
+        .navbar-nav a.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; font-weight: 600; }
+
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem 2.5rem;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(88, 166, 255, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #e6edf3 0%, #8b949e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+        }
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: #8b949e;
+            max-width: 640px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+        .hero-equation {
+            display: inline-block;
+            font-family: 'Cambria Math', 'Georgia', serif;
+            font-size: 1.05rem;
+            color: #79c0ff;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
+            letter-spacing: 0.02em;
+        }
+        .hero-equation .var { font-style: italic; }
+        .hero-equation .sub { font-size: 0.72em; vertical-align: sub; }
+        .hero-equation .sym { color: #8b949e; }
+
+        /* ── Section ── */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 2rem 3rem;
+        }
+        .section-label {
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #58a6ff;
+            margin-bottom: 0.5rem;
+        }
+        .section-heading {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .section-desc {
+            text-align: center;
+            color: #8b949e;
+            font-size: 0.9rem;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ── Factor Cards Grid ── */
+        .factors-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        .factor-card {
+            position: relative;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.25s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+        .factor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 12px 12px 0 0;
+            opacity: 0.7;
+            transition: opacity 0.25s;
+        }
+        .factor-card:hover {
+            border-color: #484f58;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .factor-card:hover::before { opacity: 1; }
+
+        .factor-card:nth-child(1)::before { background: #58a6ff; }
+        .factor-card:nth-child(2)::before { background: #3fb950; }
+        .factor-card:nth-child(3)::before { background: #a371f7; }
+        .factor-card:nth-child(4)::before { background: #d29922; }
+        .factor-card:nth-child(5)::before { background: #79c0ff; }
+        .factor-card:nth-child(6)::before { background: #f778ba; }
+        .factor-card:nth-child(7)::before { background: #f85149; }
+
+        .factor-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+        .factor-icon svg { width: 22px; height: 22px; }
+
+        .factor-card:nth-child(1) .factor-icon { background: rgba(88, 166, 255, 0.12); }
+        .factor-card:nth-child(1) .factor-icon svg { color: #58a6ff; }
+        .factor-card:nth-child(2) .factor-icon { background: rgba(63, 185, 80, 0.12); }
+        .factor-card:nth-child(2) .factor-icon svg { color: #3fb950; }
+        .factor-card:nth-child(3) .factor-icon { background: rgba(163, 113, 247, 0.12); }
+        .factor-card:nth-child(3) .factor-icon svg { color: #a371f7; }
+        .factor-card:nth-child(4) .factor-icon { background: rgba(210, 153, 34, 0.12); }
+        .factor-card:nth-child(4) .factor-icon svg { color: #d29922; }
+        .factor-card:nth-child(5) .factor-icon { background: rgba(121, 192, 255, 0.12); }
+        .factor-card:nth-child(5) .factor-icon svg { color: #79c0ff; }
+        .factor-card:nth-child(6) .factor-icon { background: rgba(247, 120, 186, 0.12); }
+        .factor-card:nth-child(6) .factor-icon svg { color: #f778ba; }
+        .factor-card:nth-child(7) .factor-icon { background: rgba(248, 81, 73, 0.12); }
+        .factor-card:nth-child(7) .factor-icon svg { color: #f85149; }
+
+        .factor-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .factor-desc {
+            font-size: 0.8rem;
+            color: #8b949e;
+            line-height: 1.5;
+            flex: 1;
+        }
+        .factor-arrow {
+            margin-top: 0.75rem;
+            font-size: 0.75rem;
+            color: #6e7681;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: color 0.2s;
+        }
+        .factor-card:hover .factor-arrow { color: #58a6ff; }
+
+        /* ── 3-col last row centering via span trick ── */
+        .factors-grid .factor-card:nth-child(5) { grid-column: 1; }
+        .factors-grid .factor-card:nth-child(6) { grid-column: 2; }
+        .factors-grid .factor-card:nth-child(7) { grid-column: 3; }
+
+        /* ── Core Engine ── */
+        .engine-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem 4rem;
+        }
+        .engine-banner {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+        }
+        .engine-badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #3fb950;
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid rgba(63, 185, 80, 0.2);
+            border-radius: 20px;
+            padding: 0.25rem 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .engine-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .engine-desc {
+            color: #8b949e;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .engine-features {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+        .engine-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: #c9d1d9;
+        }
+        .engine-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .engine-dot.green { background: #3fb950; box-shadow: 0 0 6px rgba(63, 185, 80, 0.4); }
+        .engine-dot.blue { background: #58a6ff; box-shadow: 0 0 6px rgba(88, 166, 255, 0.4); }
+        .engine-dot.purple { background: #a371f7; box-shadow: 0 0 6px rgba(163, 113, 247, 0.4); }
+        .engine-dot.orange { background: #d29922; box-shadow: 0 0 6px rgba(210, 153, 34, 0.4); }
+
+        /* ── Workflow ── */
+        .workflow-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+        .workflow-steps {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 0;
+            flex-wrap: wrap;
+        }
+        .workflow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 160px;
+        }
+        .workflow-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #21262d;
+            border: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #58a6ff;
+            margin-bottom: 0.6rem;
+        }
+        .workflow-step-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .workflow-step-desc {
+            font-size: 0.72rem;
+            color: #8b949e;
+            line-height: 1.4;
+        }
+        .workflow-connector {
+            display: flex;
+            align-items: center;
+            padding-top: 0.5rem;
+            color: #30363d;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid #21262d;
+            color: #6e7681;
+            font-size: 0.75rem;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .factors-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .factors-grid .factor-card:nth-child(5),
+            .factors-grid .factor-card:nth-child(6),
+            .factors-grid .factor-card:nth-child(7) {
+                grid-column: auto;
+            }
+            .hero-title { font-size: 2.2rem; }
+            .workflow-steps { gap: 0.5rem; }
+            .workflow-connector { display: none; }
+        }
+        @media (max-width: 560px) {
+            .factors-grid { grid-template-columns: 1fr; }
+            .navbar { padding: 0.7rem 1rem; }
+            .hero { padding: 2.5rem 1rem 1.5rem; }
+            .section { padding: 1.5rem 1rem 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            <div class="navbar-logo">CA</div>
+            <span class="navbar-title">ClairvoyantAlpha</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="index.html" class="active">Platform</a>
+            <a href="home.html">Query Generator</a>
+            <a href="d.html">DuckDB Browser</a>
+            <a href="s.html">Feature Summaries</a>
+            <a href="ft.html">Feature Taxonomy</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1 class="hero-title">ClairvoyantAlpha</h1>
+        <p class="hero-subtitle">
+            Signal-weighted belief aggregation for capital markets. Model stock price as exposure-weighted
+            signals from heterogeneous information sources &mdash; fundamentals, macro, sentiment,
+            options, catalysts &mdash; unified into one analytical workspace.
+        </p>
+        <div class="hero-equation">
+            <span class="var">P</span><span class="sub">t</span>
+            <span class="sym"> = </span>
+            <span class="var">&alpha;</span><span class="sub">t</span>
+            <span class="sym"> + </span>
+            <span class="sym">&Sigma;</span>
+            <span class="var"> &beta;</span><span class="sub">i,t</span>
+            <span class="sym"> &middot; </span>
+            <span class="var">S</span><span class="sub">i,t</span>
+            <span class="sym"> + </span>
+            <span class="var">&epsilon;</span><span class="sub">t</span>
+        </div>
+    </section>
+
+    <!-- Factor Cards -->
+    <section class="section">
+        <p class="section-label">Signal Factors</p>
+        <h2 class="section-heading">Seven Pillars of Price Discovery</h2>
+        <p class="section-desc">
+            Each factor produces a standardized signal. The stock has a loading (&beta;) to that signal &mdash;
+            an information transmission coefficient, not a risk premium.
+        </p>
+
+        <div class="factors-grid">
+            <!-- 1: Fundamental Valuation -->
+            <a href="Views/fundamental-valuation.html" class="factor-card">
+                <div class="factor-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <div class="factor-title">Fundamental Valuation</div>
+                <div class="factor-desc">DCF modeling with footnote-level granularity, comparable analysis, regime-conditional discount rates, and earnings quality assessment.</div>
+                <div class="factor-arrow">Explore &rarr;</div>
+            </a>
+
+            <!-- 2: MacroEconomic Data -->
+            <a href="Views/macroeconomic-data.html" class="factor-card">
+                <div class="factor-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/>
+                    </svg>
+                </div>
+                <div class="factor-title">MacroEconomic Data</div>
+                <div class="factor-desc">FRED, IMF, BLS &mdash; 800K+ series. HMM/GMM regime clustering, transition matrices, z-score event detection, and macro sensitivity analysis.</div>
+                <div class="factor-arrow">Explore &rarr;</div>
+            </a>
+
+            <!-- 3: Market-Implied Expectations -->
+            <a href="Views/market-implied.html" class="factor-card">
+                <div class="factor-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <div class="factor-title">Market-Implied Expectations</div>
+                <div class="factor-desc">Options surface modeling, skew analysis, IV term structure, put-call parity signals, and volatility regime detection from market pricing.</div>
+                <div class="factor-arrow">Explore &rarr;</div>
+            </a>
+
+            <!-- 4: Information Flow -->
+            <a href="Views/information-flow.html" class="factor-card">
+                <div class="factor-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <div class="factor-title">Information Flow</div>
+                <div class="factor-desc">Sell-side research parsing, earnings surprise measurement, analyst revision intensity, and guidance change detection with CFA-grade reasoning.</div>
+                <div class="factor-arrow">Explore &rarr;</div>
+            </a>
+
+            <!-- 5: Behavioral Signals -->
+            <a href="Views/behavioral-signals.html" class="factor-card">
+                <div class="factor-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a8 8 0 0 0-8 8c0 3.5 2 6 4 7.5V20h8v-2.5c2-1.5 4-4 4-7.5a8 8 0 0 0-8-8z"/><line x1="10" y1="22" x2="14" y2="22"/>
+                    </svg>
+                </div>
+                <div class="factor-title">Behavioral Signals</div>
+                <div class="factor-desc">NLP sentiment scoring from news and social media, narrative pattern detection, management language analysis, and claim-level extraction.</div>
+                <div class="factor-arrow">Explore &rarr;</div>
+            </a>
+
+            <!-- 6: Regime & Context -->
+            <a href="Views/regime-context.html" class="factor-card">
+                <div class="factor-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                </div>
+                <div class="factor-title">Regime &amp; Context</div>
+                <div class="factor-desc">Sector stability analysis, macro sensitivity scoring, cross-sector correlation dynamics, and structural break detection across market regimes.</div>
+                <div class="factor-arrow">Explore &rarr;</div>
+            </a>
+
+            <!-- 7: Discrete Events -->
+            <a href="Views/discrete-events.html" class="factor-card">
+                <div class="factor-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                </div>
+                <div class="factor-title">Discrete Events</div>
+                <div class="factor-desc">Catalyst probability modeling via Poisson/Hawkes processes, payoff size estimation, event study framework (CAR/CAAR), and conditional return distributions.</div>
+                <div class="factor-arrow">Explore &rarr;</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Workflow -->
+    <section class="workflow-section">
+        <p class="section-label">Agentic Workflow</p>
+        <h2 class="section-heading" style="text-align:center; margin-bottom:0.4rem;">Query to Insight</h2>
+        <p class="section-desc" style="text-align:center; margin-bottom:2rem;">
+            User input flows through deterministic retrieval before any reasoning occurs. LLMs synthesize &mdash; they never invent.
+        </p>
+
+        <div class="workflow-steps">
+            <div class="workflow-step">
+                <div class="workflow-num">1</div>
+                <div class="workflow-step-title">User Query</div>
+                <div class="workflow-step-desc">Natural language question parsed into a structured task graph</div>
+            </div>
+            <div class="workflow-connector">&rarr;</div>
+            <div class="workflow-step">
+                <div class="workflow-num">2</div>
+                <div class="workflow-step-title">Tag Resolution</div>
+                <div class="workflow-step-desc">Map to canonical tags &mdash; entities, time, data types</div>
+            </div>
+            <div class="workflow-connector">&rarr;</div>
+            <div class="workflow-step">
+                <div class="workflow-num">3</div>
+                <div class="workflow-step-title">Agent Broadcast</div>
+                <div class="workflow-step-desc">Parallel dispatch to macro, sector, and company agents</div>
+            </div>
+            <div class="workflow-connector">&rarr;</div>
+            <div class="workflow-step">
+                <div class="workflow-num">4</div>
+                <div class="workflow-step-title">Evidence Assembly</div>
+                <div class="workflow-step-desc">Structured data, no narrative &mdash; consistency checks enforced</div>
+            </div>
+            <div class="workflow-connector">&rarr;</div>
+            <div class="workflow-step">
+                <div class="workflow-num">5</div>
+                <div class="workflow-step-title">Synthesis</div>
+                <div class="workflow-step-desc">LLM writes last &mdash; every claim linked to evidence</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Engine -->
+    <section class="engine-section">
+        <div class="engine-banner">
+            <div class="engine-badge">Always On</div>
+            <h3 class="engine-title">Core Intelligence Engine</h3>
+            <p class="engine-desc">
+                Running 24/7 &mdash; tagging data, discovering catalysts, computing regime transitions,
+                and storing statistical artifacts so agents retrieve pre-computed truths, never re-derive.
+            </p>
+            <div class="engine-features">
+                <div class="engine-feature">
+                    <div class="engine-dot green"></div>
+                    Tags &amp; Hierarchies
+                </div>
+                <div class="engine-feature">
+                    <div class="engine-dot blue"></div>
+                    Catalyst Detection
+                </div>
+                <div class="engine-feature">
+                    <div class="engine-dot purple"></div>
+                    Relational Mapping
+                </div>
+                <div class="engine-feature">
+                    <div class="engine-dot orange"></div>
+                    Moat Identification
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        ClairvoyantAlpha &middot; Signal-Weighted Belief Aggregation
+    </footer>
+
+</body>
+</html>
